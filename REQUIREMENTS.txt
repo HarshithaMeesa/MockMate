@@ -1,0 +1,16 @@
+py -3.10 --version
+
+pip install --upgrade pip
+
+>pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+>pip install openai-whisper
+
+pip install reportlab
+
+pip install pyttsx3
+
+>pip install pypdf2
+
+>pip install opencv-python sounddevice scipy pyttsx3
+

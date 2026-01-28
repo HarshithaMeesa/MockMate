@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI Interview</title>
+</head>
+<body>
+
+<h2>AI Interviewer</h2>
+
+<img src="avatar.png" width="200" />
+<br><br>
+
+<video id="cam" width="400" autoplay></video>
+
+<p id="question">Tell me about yourself</p>
+<button onclick="answer()">Answer</button>
+
+<script>
+navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+.then(stream => {
+  document.getElementById("cam").srcObject = stream;
+});
+
+function answer() {
+  alert("Recording answer...");
+}
+</script>
+
+</body>
+</html>
