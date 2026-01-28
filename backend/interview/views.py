@@ -1,9 +1,10 @@
+import os
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-from .ai_avatar import start_avatar_interview
+# from .ai_avatar import start_avatar_interview
 from .question_generator import generate_questions
 from .models import Resume, InterviewSession
 from .vision_analyzer import analyze_interview
@@ -33,7 +34,7 @@ class ResumeUploadView(APIView):
         resume.skills = ", ".join(skills)
         resume.save()
 
-        questions = start_avatar_interview(role)
+        questions = generate_questions(role, skills)
 
 
         return Response({
@@ -105,8 +106,8 @@ class StartInterviewView(APIView):
                 "eye_contact_score": eye_contact,
                 "confidence_score": confidence_score,
                 "transcript": transcript,
-                "chart_path": chart_path,
-                "pdf_path": pdf_path
+                "chart_url": f"/media/{os.path.basename(chart_path)}",
+                "pdf_url": f"/media/{os.path.basename(pdf_path)}"
             }, status=status.HTTP_200_OK)
 
         except Exception as e:

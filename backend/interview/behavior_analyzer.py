@@ -1,15 +1,10 @@
-def analyze_behavior(eye_contact, transcript):
-    """
-    Simulated behavioral analysis based on:
-    - eye contact score
-    - length and clarity of speech
-    """
+def analyze_behavior(transcript):
+    filler_words = ["um", "uh", "like"]
+    count = sum(transcript.lower().count(w) for w in filler_words)
 
-    # Confidence based on speech length
-    word_count = len(transcript.split())
-    confidence_score = min(word_count / 50, 1.0) * 100
+    confidence = max(0.5, 1 - count * 0.05)
 
     return {
-        "eye_contact_score": eye_contact,
-        "confidence_score": round(confidence_score, 2)
+        "confidence": round(confidence, 2),
+        "clarity": round(confidence * 0.9, 2)
     }

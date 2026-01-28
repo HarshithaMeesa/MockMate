@@ -4,21 +4,57 @@
   <title>MockMate AI Interview</title>
 </head>
 <body>
-  <h2>Upload Resume</h2>
-  <input type="file" id="resume" /><br><br>
 
-  <label>Role:</label>
-  <select id="role">
-    <option>SDE</option>
-    <option>Data Analyst</option>
-  </select><br><br>
+<h2>AI Mock Interview Platform</h2>
 
-  <button onclick="start()">Start AI Interview</button>
+<label>Role:</label>
+<select id="role">
+  <option>SDE</option>
+  <option>HR</option>
+  <option>Analyst</option>
+</select>
 
-  <script>
-    function start() {
-      window.location.href = "interview.html";
-    }
-  </script>
+<br><br>
+
+<label>Upload Resume:</label>
+<input type="file" id="resume">
+
+<br><br>
+
+<button onclick="startInterview()">Start Interview</button>
+
+<p id="status"></p>
+
+<script>
+async function startInterview() {
+  const status = document.getElementById("status");
+  status.innerText = "AI avatar is interviewing you... Please wait ⏳";
+
+  try {
+    const res = await fetch("http://127.0.0.1:8000/api/interview/start-interview/", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        role: document.getElementById("role").value,
+        audio_path: "answer.wav"
+      })
+    });
+
+    const data = await res.json();
+
+    status.innerHTML = `
+      <h3>Interview Completed ✅</h3>
+      <p>Eye Contact Score: ${data.eye_contact_score}</p>
+      <p>Confidence Score: ${data.confidence_score}</p>
+      <a href="http://127.0.0.1:8000${data.pdf_url}" target="_blank">📄 Download Report</a>
+    `;
+  } catch (err) {
+    status.innerText = "Error occurred during interview.";
+  }
+}
+</script>
+
+
+
 </body>
 </html>
