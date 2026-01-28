@@ -5,7 +5,7 @@
 </head>
 <body>
 
-<h2>AI Mock Interview Platform</h2>
+<h2>MockMate – AI Interview Platform</h2>
 
 <label>Role:</label>
 <select id="role">
@@ -21,41 +21,14 @@
 
 <br><br>
 
-<button onclick="startInterview()">Start Interview</button>
-
-<p id="status"></p>
+<button onclick="goToInterview()">Start Interview</button>
 
 <script>
-  
-async function startInterview() {
-  const status = document.getElementById("status");
-  status.innerText = "AI avatar is interviewing you... Please wait ⏳";
-
-  try {
-    const res = await fetch("http://127.0.0.1:8000/api/interview/start-interview/", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        role: document.getElementById("role").value,
-        audio_path: "answer.wav"
-      })
-    });
-
-    const data = await res.json();
-
-    status.innerHTML = `
-      <h3>Interview Completed ✅</h3>
-      <p>Eye Contact Score: ${data.eye_contact_score}</p>
-      <p>Confidence Score: ${data.confidence_score}</p>
-      <a href="http://127.0.0.1:8000${data.pdf_url}" target="_blank">📄 Download Report</a>
-    `;
-  } catch (err) {
-    status.innerText = "Error occurred during interview.";
-  }
+function goToInterview() {
+  const role = document.getElementById("role").value;
+  window.location.href = `interview.html?role=${role}`;
 }
 </script>
-
-
 
 </body>
 </html>

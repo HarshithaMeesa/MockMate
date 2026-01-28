@@ -2,29 +2,137 @@
 <html>
 <head>
   <title>AI Interview</title>
+  <style>
+.avatar {
+  font-size: 120px;
+  transition: transform 0.3s, color 0.3s;
+  animation: breathe 2s infinite;
+}
+
+@keyframes breathe {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.avatar.speaking {
+  color: #007bff;
+  transform: scale(1.2);
+}
+
+.avatar.listening {
+  color: green;
+}
+</style>
+
 </head>
 <body>
 
 <h2>AI Interviewer</h2>
 
-<img src="avatar.png" width="200" />
-<br><br>
+<div style="display:flex; gap:40px; align-items:center;">
+  <div id="avatar" class="avatar">🤖</div>
 
-<video id="cam" width="400" autoplay></video>
+  <video id="cam" width="400" autoplay muted></video>
+</div>
 
-<p id="question">Tell me about yourself</p>
-<button onclick="answer()">Answer</button>
+<h3 id="question">Waiting to start...</h3>
+<p id="status"></p>
 
 <script>
+let questions = [];
+let index = 0;
+let recorder;
+let stream;
+let chunks = [];
+let interviewActive = true;
+
+const role = new URLSearchParams(window.location.search).get("role");
+
+if (role === "SDE") {
+  questions = [
+    "Tell me about yourself",
+    "Explain object oriented programming",
+    "What is time complexity",
+    "Describe your project"
+  ];
+} else if (role === "HR") {
+  questions = [
+    "Introduce yourself",
+    "What are your strengths",
+    "Why should we hire you"
+  ];
+}
+
 navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-.then(stream => {
+.then(s => {
+  stream = s;
   document.getElementById("cam").srcObject = stream;
+  recorder = new MediaRecorder(stream);
+  startInterview();
 });
 
-function answer() {
-  alert("Recording answer...");
+async function startInterview() {
+  for (index = 0; index < questions.length; index++) {
+    if (!interviewActive) break;
+
+    await askQuestion(questions[index]);
+    await recordAnswer();
+  }
+
+  document.getElementById("question").innerText = "Interview completed ✅";
+  document.getElementById("status").innerText = "Generating report...";
+  sendToBackend();
+}
+
+function speak(text) {
+  return new Promise(resolve => {
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.rate = 0.9;
+    msg.onend = resolve;
+    speechSynthesis.speak(msg);
+  });
+}
+
+async function askQuestion(q) {
+  document.getElementById("question").innerText = q;
+  document.getElementById("status").innerText = "AI speaking...";
+  await speak(q);
+}
+
+function recordAnswer() {
+  return new Promise(resolve => {
+    chunks = [];
+    recorder.ondataavailable = e => chunks.push(e.data);
+    recorder.start();
+
+    document.getElementById("status").innerText = "Listening...";
+
+    setTimeout(() => {
+      recorder.stop();
+      resolve();
+    }, 6000);
+  });
+}
+
+function sendToBackend() {
+  fetch("http://127.0.0.1:8000/api/interview/start-interview/", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ role })
+  })
+  .then(res => res.json())
+  .then(data => {
+    document.body.innerHTML += `
+      <h3>Report Ready ✅</h3>
+      <a href="http://127.0.0.1:8000${data.pdf_path}" target="_blank">
+        Download PDF
+      </a>
+    `;
+  });
 }
 </script>
+
 
 </body>
 </html>
